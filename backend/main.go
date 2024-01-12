@@ -2,11 +2,14 @@ package main
 
 import (
 	"github.com/flutterninja9/todoo/backend/config"
+	"github.com/flutterninja9/todoo/backend/router"
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
 
 func main() {
+	logger := logrus.New()
 	appConfig := new(config.Config)
 	viper := viper.New()
 	viper.AddConfigPath(".")
@@ -21,11 +24,7 @@ func main() {
 	}
 
 	app := gin.New()
-	app.GET("/", func(ctx *gin.Context) {
-		ctx.JSON(200, gin.H{
-			"message": "OK",
-		})
-	})
-
+	router := router.NewAppRouter(app, logger)
+	router.Setup()
 	app.Run(appConfig.SERVER_PORT)
 }
