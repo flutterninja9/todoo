@@ -1,6 +1,7 @@
 package router
 
 import (
+	"github.com/flutterninja9/todoo/backend/db"
 	"github.com/flutterninja9/todoo/backend/handlers"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -9,6 +10,7 @@ import (
 type AppRouter struct {
 	logger      *logrus.Logger
 	engine      *gin.Engine
+	db          *db.Database
 	login       handlers.LoginHandler
 	register    handlers.RegisterHandler
 	getTodos    handlers.GetTodosHandler
@@ -18,10 +20,11 @@ type AppRouter struct {
 	healthCheck handlers.HealthCheckHandler
 }
 
-func NewAppRouter(engine *gin.Engine, logger *logrus.Logger) *AppRouter {
+func NewAppRouter(engine *gin.Engine, logger *logrus.Logger, d *db.Database) *AppRouter {
 	return &AppRouter{
 		engine:      engine,
 		logger:      logger,
+		db:          d,
 		login:       *handlers.NewLoginHandler(logger),
 		register:    *handlers.NewRegisterHandler(logger),
 		getTodos:    *handlers.NewGetTodosHandler(logger),

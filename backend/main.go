@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/flutterninja9/todoo/backend/config"
+	"github.com/flutterninja9/todoo/backend/db"
 	"github.com/flutterninja9/todoo/backend/router"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -23,8 +24,15 @@ func main() {
 		panic(decodeErr)
 	}
 
+	db := db.NewDatabase(logger, appConfig)
+	dbErr := db.Init()
+	if dbErr != nil {
+		logger.Panic(dbErr)
+	}
+
+	defer db.Dispose()
 	app := gin.New()
-	router := router.NewAppRouter(app, logger)
+	router := router.NewAppRouter(app, logger, db)
 	router.Setup()
 	app.Run(appConfig.SERVER_PORT)
 }
