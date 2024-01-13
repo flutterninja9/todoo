@@ -3,6 +3,7 @@ package router
 import (
 	"github.com/flutterninja9/todoo/backend/db"
 	"github.com/flutterninja9/todoo/backend/handlers"
+	middleware "github.com/flutterninja9/todoo/backend/middlewares"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 )
@@ -37,7 +38,7 @@ func NewAppRouter(engine *gin.Engine, logger *logrus.Logger, d *db.Database) *Ap
 
 func (a *AppRouter) Setup() {
 	todos := a.engine.Group("/todos")
-
+	todos.Use(middleware.AuthMiddleware)
 	a.engine.GET("/", a.healthCheck.Handle)
 	a.engine.POST("/login", a.login.Handle)
 	a.engine.POST("/register", a.register.Handle)
