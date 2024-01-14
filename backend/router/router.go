@@ -32,7 +32,7 @@ func NewAppRouter(engine *gin.Engine, logger *logrus.Logger, d *db.Database, v v
 		db:          d,
 		validateor:  v,
 		config:      c,
-		login:       *handlers.NewLoginHandler(logger),
+		login:       *handlers.NewLoginHandler(logger, c, d),
 		register:    *handlers.NewRegisterHandler(logger, v, d, c),
 		getTodos:    *handlers.NewGetTodosHandler(logger),
 		createTodo:  *handlers.NewCreateTodoHandler(logger),

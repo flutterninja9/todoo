@@ -11,7 +11,7 @@ import (
 )
 
 type User struct {
-	Id        primitive.ObjectID `json:"id"`
+	Id        primitive.ObjectID `bson:"_id" json:"id"`
 	FirstName string             `bson:"first_name" json:"first_name"`
 	LastName  string             `bson:"last_name" json:"last_name"`
 	Email     string             `bson:"email" json:"email"`
@@ -29,10 +29,25 @@ func (u *User) Save(d *db.Database) (*User, error) {
 		return nil, errors.New("User already exists")
 	}
 
-	res, err := collection.InsertOne(context.TODO(), u)
+	u.Id = primitive.NewObjectID()
+	_, err = collection.InsertOne(context.TODO(), u)
 	if err != nil {
 		return nil, err
 	}
-	u.Id = res.InsertedID.(primitive.ObjectID)
 	return u, nil
+}
+
+func GetUserByEmail(email string, d *db.Database) (*User, error) {
+	var collection = d.Client.Database(constants.TODOSDB).Collection(constants.USERSCOLL)
+	result := collection.FindOne(context.TODO(), bson.M{"email": email})
+	if result.Err() != nil {
+		return nil, result.Err()
+	}
+	user := new(User)
+	err := result.Decode(user)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
 }
