@@ -34,7 +34,7 @@ func main() {
 	defer db.Dispose()
 	app := gin.New()
 	validator := validator.New(validator.WithRequiredStructEnabled())
-	router := router.NewAppRouter(app, logger, db, *validator)
+	router := router.NewAppRouter(app, logger, db, *validator, *appConfig)
 	router.Setup()
 	app.Run(appConfig.SERVER_PORT)
 }

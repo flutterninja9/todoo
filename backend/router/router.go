@@ -1,6 +1,7 @@
 package router
 
 import (
+	"github.com/flutterninja9/todoo/backend/config"
 	"github.com/flutterninja9/todoo/backend/db"
 	"github.com/flutterninja9/todoo/backend/handlers"
 	middleware "github.com/flutterninja9/todoo/backend/middlewares"
@@ -13,6 +14,7 @@ type AppRouter struct {
 	logger      *logrus.Logger
 	engine      *gin.Engine
 	db          *db.Database
+	config      config.Config
 	validateor  validator.Validate
 	login       handlers.LoginHandler
 	register    handlers.RegisterHandler
@@ -23,14 +25,15 @@ type AppRouter struct {
 	healthCheck handlers.HealthCheckHandler
 }
 
-func NewAppRouter(engine *gin.Engine, logger *logrus.Logger, d *db.Database, v validator.Validate) *AppRouter {
+func NewAppRouter(engine *gin.Engine, logger *logrus.Logger, d *db.Database, v validator.Validate, c config.Config) *AppRouter {
 	return &AppRouter{
 		engine:      engine,
 		logger:      logger,
 		db:          d,
 		validateor:  v,
+		config:      c,
 		login:       *handlers.NewLoginHandler(logger),
-		register:    *handlers.NewRegisterHandler(logger, v, d),
+		register:    *handlers.NewRegisterHandler(logger, v, d, c),
 		getTodos:    *handlers.NewGetTodosHandler(logger),
 		createTodo:  *handlers.NewCreateTodoHandler(logger),
 		updateTodo:  *handlers.NewUpdateTodoHandler(logger),

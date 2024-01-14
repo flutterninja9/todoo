@@ -3,6 +3,7 @@ package handlers
 import (
 	"net/http"
 
+	"github.com/flutterninja9/todoo/backend/config"
 	"github.com/flutterninja9/todoo/backend/db"
 	"github.com/flutterninja9/todoo/backend/models"
 	"github.com/flutterninja9/todoo/backend/utils"
@@ -29,15 +30,17 @@ func (r *RegisterRequest) toEntity() *models.User {
 
 type RegisterHandler struct {
 	logger    *logrus.Logger
+	config    config.Config
 	validator validator.Validate
 	database  *db.Database
 }
 
-func NewRegisterHandler(logger *logrus.Logger, v validator.Validate, d *db.Database) *RegisterHandler {
+func NewRegisterHandler(logger *logrus.Logger, v validator.Validate, d *db.Database, c config.Config) *RegisterHandler {
 	return &RegisterHandler{
 		logger:    logger,
 		validator: v,
 		database:  d,
+		config:    c,
 	}
 }
 
@@ -66,5 +69,11 @@ func (l *RegisterHandler) Handle(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": savedEntity})
+	accessToken, err := utils.GenerateToken(*savedEntity, l.config)
+	if err != nil {
+		l.logger.Warning("Error generating access token", err)
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"data": savedEntity, "token": accessToken})
 }
