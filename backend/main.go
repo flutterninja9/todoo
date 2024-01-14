@@ -5,6 +5,7 @@ import (
 	"github.com/flutterninja9/todoo/backend/db"
 	"github.com/flutterninja9/todoo/backend/router"
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
@@ -32,7 +33,8 @@ func main() {
 
 	defer db.Dispose()
 	app := gin.New()
-	router := router.NewAppRouter(app, logger, db)
+	validator := validator.New(validator.WithRequiredStructEnabled())
+	router := router.NewAppRouter(app, logger, db, *validator)
 	router.Setup()
 	app.Run(appConfig.SERVER_PORT)
 }

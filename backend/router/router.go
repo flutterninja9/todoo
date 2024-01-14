@@ -5,6 +5,7 @@ import (
 	"github.com/flutterninja9/todoo/backend/handlers"
 	middleware "github.com/flutterninja9/todoo/backend/middlewares"
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 	"github.com/sirupsen/logrus"
 )
 
@@ -12,6 +13,7 @@ type AppRouter struct {
 	logger      *logrus.Logger
 	engine      *gin.Engine
 	db          *db.Database
+	validateor  validator.Validate
 	login       handlers.LoginHandler
 	register    handlers.RegisterHandler
 	getTodos    handlers.GetTodosHandler
@@ -21,13 +23,14 @@ type AppRouter struct {
 	healthCheck handlers.HealthCheckHandler
 }
 
-func NewAppRouter(engine *gin.Engine, logger *logrus.Logger, d *db.Database) *AppRouter {
+func NewAppRouter(engine *gin.Engine, logger *logrus.Logger, d *db.Database, v validator.Validate) *AppRouter {
 	return &AppRouter{
 		engine:      engine,
 		logger:      logger,
 		db:          d,
+		validateor:  v,
 		login:       *handlers.NewLoginHandler(logger),
-		register:    *handlers.NewRegisterHandler(logger),
+		register:    *handlers.NewRegisterHandler(logger, v),
 		getTodos:    *handlers.NewGetTodosHandler(logger),
 		createTodo:  *handlers.NewCreateTodoHandler(logger),
 		updateTodo:  *handlers.NewUpdateTodoHandler(logger),
