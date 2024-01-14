@@ -14,7 +14,7 @@ import (
 type Database struct {
 	logger *logrus.Logger
 	config *config.Config
-	client *mongo.Client
+	Client *mongo.Client
 }
 
 func NewDatabase(l *logrus.Logger, c *config.Config) *Database {
@@ -29,7 +29,7 @@ func (d *Database) Init() error {
 	serverAPI := options.ServerAPI(options.ServerAPIVersion1)
 	opts := options.Client().ApplyURI(d.config.CONN_URL).SetServerAPIOptions(serverAPI)
 	client, err := mongo.Connect(context.TODO(), opts)
-	d.client = client
+	d.Client = client
 	d.logger.Info("client initialized and set succesfully")
 	if err != nil {
 		panic(err)
@@ -45,12 +45,12 @@ func (d *Database) Init() error {
 }
 
 func (d *Database) Dispose() error {
-	if d.client == nil {
+	if d.Client == nil {
 		return errors.New("no client specified in db")
 	}
 
 	d.logger.Info("disposing database")
-	err := d.client.Disconnect(context.TODO())
+	err := d.Client.Disconnect(context.TODO())
 	if err != nil {
 		d.logger.Warning("error disposing database")
 		return err
