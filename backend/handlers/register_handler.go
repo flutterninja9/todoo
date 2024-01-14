@@ -5,10 +5,10 @@ import (
 
 	"github.com/flutterninja9/todoo/backend/db"
 	"github.com/flutterninja9/todoo/backend/models"
+	"github.com/flutterninja9/todoo/backend/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/sirupsen/logrus"
-	"golang.org/x/crypto/bcrypt"
 )
 
 type RegisterRequest struct {
@@ -50,7 +50,7 @@ func (l *RegisterHandler) Handle(c *gin.Context) {
 		return
 	}
 
-	hashedPassword, err := generateHash(user.Password)
+	hashedPassword, err := utils.HashPassword(user.Password)
 	if err != nil {
 		l.logger.Warning("Unable to hash password", err)
 		c.AbortWithStatus(http.StatusInternalServerError)
@@ -67,13 +67,4 @@ func (l *RegisterHandler) Handle(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"data": savedEntity})
-}
-
-func generateHash(password string) (string, error) {
-	hashed, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	if err != nil {
-		return "", err
-	}
-
-	return string(hashed), nil
 }
