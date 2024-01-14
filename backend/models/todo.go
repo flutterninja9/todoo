@@ -6,6 +6,8 @@ type Todo struct {
 	Id        primitive.ObjectID  `bson:"_id" json:"id"`
 	UserId    primitive.ObjectID  `bson:"user_id" json:"user_id"`
 	Status    string              `bson:"status" json:"status"`
+	Title     string              `bson:"title" json:"title"`
+	Content   string              `bson:"content" json:"content"`
 	CreatedAt primitive.Timestamp `bson:"created_at" json:"created_at"`
 	UpdatedAt primitive.Timestamp `bson:"updated_at" json:"updated_at"`
 }
