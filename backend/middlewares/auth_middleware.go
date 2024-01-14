@@ -37,21 +37,25 @@ func AuthMiddleware(c *gin.Context) {
 	})
 
 	if err != nil {
-		http.Error(c.Writer, "invalid token", http.StatusUnauthorized)
+		c.AbortWithError(http.StatusUnauthorized, err)
+		return
 	}
 
 	claims, ok := token.Claims.(jwt.MapClaims)
 
 	if !ok || !token.Valid {
-		http.Error(c.Writer, "invalid token", http.StatusUnauthorized)
+		c.AbortWithError(http.StatusUnauthorized, err)
+		return
 	}
 
 	exp, ok := claims["exp"].(float64)
 	if !ok {
-		http.Error(c.Writer, "invalid token", http.StatusUnauthorized)
+		c.AbortWithError(http.StatusUnauthorized, err)
+		return
 	}
 	if int64(exp) < time.Now().Unix() {
-		http.Error(c.Writer, "token expired", http.StatusUnauthorized)
+		c.AbortWithError(http.StatusUnauthorized, err)
+		return
 	}
 
 	authInfo := &AuthInfo{

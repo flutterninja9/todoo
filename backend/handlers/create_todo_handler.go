@@ -21,7 +21,7 @@ func NewCreateTodoHandler(logger *logrus.Logger) *CreateTodoHandler {
 func (l *CreateTodoHandler) Handle(c *gin.Context) {
 	iAuthInfo, exists := c.Get("authInfo")
 	if !exists {
-		c.Status(http.StatusUnauthorized)
+		c.AbortWithStatus(http.StatusUnauthorized)
 	}
 
 	authInfo := iAuthInfo.(*middleware.AuthInfo)

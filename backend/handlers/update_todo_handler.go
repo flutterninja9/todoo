@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -21,7 +20,7 @@ func NewUpdateTodoHandler(logger *logrus.Logger) *UpdateTodoHandler {
 func (l *UpdateTodoHandler) Handle(c *gin.Context) {
 	id, ok := c.Params.Get("id")
 	if !ok {
-		c.Error(errors.New("unable to get id"))
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "unable to get id"})
 		return
 	}
 
