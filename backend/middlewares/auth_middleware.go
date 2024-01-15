@@ -2,12 +2,13 @@ package middleware
 
 import (
 	"errors"
+	"log"
 	"net/http"
-	"os"
 	"strings"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/flutterninja9/todoo/backend/config"
 	"github.com/gin-gonic/gin"
 )
 
@@ -18,7 +19,7 @@ type AuthInfo struct {
 }
 
 // AuthMiddleware is a Fiber middleware for extracting and decoding the JWT token from the Authorization header
-func AuthMiddleware(c *gin.Context) {
+func AuthMiddleware(c *gin.Context, config config.Config) {
 	authHeader := c.Request.Header.Get("Authorization")
 	bearerToken := ""
 
@@ -33,7 +34,7 @@ func AuthMiddleware(c *gin.Context) {
 			return nil, errors.New("unexpected signing method")
 		}
 		// Use the secret key used to sign the token
-		return []byte(os.Getenv("JWT_SECRET")), nil
+		return []byte(config.JWT_SECRET), nil
 	})
 
 	if err != nil {
@@ -63,6 +64,7 @@ func AuthMiddleware(c *gin.Context) {
 		Claims: claims,
 	}
 
+	log.Println("Setting content")
 	c.Set("authInfo", authInfo)
 
 	c.Next()

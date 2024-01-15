@@ -12,7 +12,7 @@ func GenerateToken(u models.User, c config.Config) (string, error) {
 	token := jwt.New(jwt.SigningMethodHS256)
 	claims := token.Claims.(jwt.MapClaims)
 	claims["user_id"] = u.Id
-	claims["exp"] = time.Now().Add(time.Hour * 2)
+	claims["exp"] = time.Now().Add(time.Hour * 2).Unix()
 
 	t, err := token.SignedString([]byte(c.JWT_SECRET))
 	if err != nil {

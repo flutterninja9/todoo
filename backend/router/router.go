@@ -35,7 +35,7 @@ func NewAppRouter(engine *gin.Engine, logger *logrus.Logger, d *db.Database, v v
 		login:       *handlers.NewLoginHandler(logger, c, d),
 		register:    *handlers.NewRegisterHandler(logger, v, d, c),
 		getTodos:    *handlers.NewGetTodosHandler(logger),
-		createTodo:  *handlers.NewCreateTodoHandler(logger),
+		createTodo:  *handlers.NewCreateTodoHandler(logger, v, d, c),
 		updateTodo:  *handlers.NewUpdateTodoHandler(logger),
 		deleteTodo:  *handlers.NewDeleteTodoHandler(logger),
 		healthCheck: *handlers.NewHealthCheckHandler(logger),
@@ -44,7 +44,9 @@ func NewAppRouter(engine *gin.Engine, logger *logrus.Logger, d *db.Database, v v
 
 func (a *AppRouter) Setup() {
 	todos := a.engine.Group("/todos")
-	todos.Use(middleware.AuthMiddleware)
+	todos.Use(func(c *gin.Context) {
+		middleware.AuthMiddleware(c, a.config)
+	})
 	a.engine.GET("/", a.healthCheck.Handle)
 	a.engine.POST("/login", a.login.Handle)
 	a.engine.POST("/register", a.register.Handle)
