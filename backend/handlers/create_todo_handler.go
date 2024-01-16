@@ -27,8 +27,10 @@ func (c *CreateTodoRequest) toEntity(u string) (*models.Todo, error) {
 	entity.UserID, _ = primitive.ObjectIDFromHex(u)
 	entity.Status = string(c.Status)
 	entity.ID = primitive.NewObjectID()
-	entity.CreatedAt = time.Now().UTC()
-	entity.UpdatedAt = time.Now().UTC()
+
+	now := time.Now().UTC().Truncate(24 * time.Hour)
+	entity.CreatedAt = now
+	entity.UpdatedAt = now
 
 	return entity, nil
 }

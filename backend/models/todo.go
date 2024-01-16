@@ -41,15 +41,15 @@ func (t *Todo) Save(db *db.Database, l *logrus.Logger, c config.Config) error {
 }
 
 // GetTodosByUserID retrieves all Todos associated with a given user ID.
-func GetTodosByUserID(id string, d *db.Database, l *logrus.Logger) ([]Todo, error) {
-	l.Info("Trying to get todos for user ", id)
-	pUserID, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		return nil, fmt.Errorf("invalid user ID: %w", err)
+func GetTodosByUserID(d *db.Database, l *logrus.Logger, filters map[string]any) ([]Todo, error) {
+	l.Info("Trying to get todos with filters ", filters)
+	collection := d.Client.Database(constants.TODOSDB).Collection(constants.TODOSCOLL)
+	bsonFilters := bson.D{}
+	for key, val := range filters {
+		bsonFilters = append(bsonFilters, bson.E{Key: key, Value: val})
 	}
 
-	collection := d.Client.Database(constants.TODOSDB).Collection(constants.TODOSCOLL)
-	cursor, err := collection.Find(context.TODO(), bson.M{"user_id": pUserID})
+	cursor, err := collection.Find(context.TODO(), bsonFilters)
 	if err != nil {
 		return nil, fmt.Errorf("error querying data: %w", err)
 	}

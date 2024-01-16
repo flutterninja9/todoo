@@ -2,12 +2,14 @@ package handlers
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/flutterninja9/todoo/backend/db"
 	middleware "github.com/flutterninja9/todoo/backend/middlewares"
 	"github.com/flutterninja9/todoo/backend/models"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type GetTodosHandler struct {
@@ -23,6 +25,13 @@ func NewGetTodosHandler(logger *logrus.Logger, d *db.Database) *GetTodosHandler 
 }
 
 func (l *GetTodosHandler) Handle(c *gin.Context) {
+	var filters = map[string]any{}
+	dayFilter := c.Request.URL.Query().Get("day")
+	if dayFilter != "" {
+		layout := "2006-01-02"
+		filters["created_at"], _ = time.Parse(layout, dayFilter)
+	}
+
 	authData, exists := c.Get("authInfo")
 	if !exists {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "User unauthorised"})
@@ -31,7 +40,9 @@ func (l *GetTodosHandler) Handle(c *gin.Context) {
 
 	authInfo := authData.(*middleware.AuthInfo)
 	userId := authInfo.Claims["user_id"].(string)
-	todos, err := models.GetTodosByUserID(userId, l.db, l.logger)
+	primitiveId, _ := primitive.ObjectIDFromHex(userId)
+	filters["user_id"] = primitiveId
+	todos, err := models.GetTodosByUserID(l.db, l.logger, filters)
 	if err != nil {
 		l.logger.Fatal(err)
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Unable to get todos"})
