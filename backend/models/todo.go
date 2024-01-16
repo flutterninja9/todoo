@@ -97,3 +97,15 @@ func (t *Todo) UpdateTodo(i string, d *db.Database, l *logrus.Logger) bool {
 
 	return true
 }
+
+func DeleteTodo(id string, db *db.Database, l *logrus.Logger) error {
+	collection := db.Client.Database(constants.TODOSDB).Collection(constants.TODOSCOLL)
+	primitiveTodoId, _ := primitive.ObjectIDFromHex(id)
+	result, err := collection.DeleteOne(context.TODO(), bson.M{"_id": primitiveTodoId})
+	if err != nil {
+		l.Fatal(err.Error())
+	}
+
+	l.Info("Deleted ", result.DeletedCount, " todos")
+	return nil
+}

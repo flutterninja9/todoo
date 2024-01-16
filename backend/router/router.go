@@ -37,7 +37,7 @@ func NewAppRouter(engine *gin.Engine, logger *logrus.Logger, d *db.Database, v v
 		getTodos:    *handlers.NewGetTodosHandler(logger, d),
 		createTodo:  *handlers.NewCreateTodoHandler(logger, v, d, c),
 		updateTodo:  *handlers.NewUpdateTodoHandler(logger, d, c, v),
-		deleteTodo:  *handlers.NewDeleteTodoHandler(logger),
+		deleteTodo:  *handlers.NewDeleteTodoHandler(logger, d, c),
 		healthCheck: *handlers.NewHealthCheckHandler(logger),
 	}
 }
