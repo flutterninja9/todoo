@@ -55,6 +55,23 @@ func GetTodosByUserId(id string, d *db.Database, l *logrus.Logger) ([]Todo, erro
 	return result, nil
 }
 
+func (t *Todo) todoSaveableBson() primitive.D {
+	updates := bson.D{}
+	updates = append(updates, bson.E{Key: "status", Value: string(t.Status)})
+
+	if t.Title != "" {
+		updates = append(updates, bson.E{Key: "title", Value: t.Title})
+
+	}
+
+	if t.Content != "" {
+		updates = append(updates, bson.E{Key: "content", Value: t.Content})
+
+	}
+
+	return updates
+}
+
 // returns [true] if update request is successfull
 func (t *Todo) UpdateTodo(i string, d *db.Database, l *logrus.Logger) bool {
 	l.Info("Trying to update todo")
@@ -63,12 +80,8 @@ func (t *Todo) UpdateTodo(i string, d *db.Database, l *logrus.Logger) bool {
 	var filter = bson.D{{Key: "_id", Value: primitiveObjId}}
 	var updates = bson.D{
 		{
-			Key: "$set",
-			Value: bson.D{
-				{Key: "status", Value: t.Status},
-				{Key: "title", Value: t.Title},
-				{Key: "content", Value: t.Content},
-			},
+			Key:   "$set",
+			Value: t.todoSaveableBson(),
 		},
 	}
 
