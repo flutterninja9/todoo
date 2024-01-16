@@ -54,3 +54,33 @@ func GetTodosByUserId(id string, d *db.Database, l *logrus.Logger) ([]Todo, erro
 	l.Info("Total records:", len(result))
 	return result, nil
 }
+
+// returns [true] if update request is successfull
+func (t *Todo) UpdateTodo(i string, d *db.Database, l *logrus.Logger) bool {
+	l.Info("Trying to update todo")
+	primitiveObjId, _ := primitive.ObjectIDFromHex(i)
+	l.Info(primitiveObjId)
+	var filter = bson.D{{Key: "_id", Value: primitiveObjId}}
+	var updates = bson.D{
+		{
+			Key: "$set",
+			Value: bson.D{
+				{Key: "status", Value: t.Status},
+				{Key: "title", Value: t.Title},
+				{Key: "content", Value: t.Content},
+			},
+		},
+	}
+
+	collection := d.Client.Database(constants.TODOSDB).Collection(constants.TODOSCOLL)
+	var result, err = collection.UpdateOne(context.TODO(), filter, updates)
+	if err != nil {
+		l.Fatal("Unable to update todo: ", err.Error())
+		return false
+	}
+
+	l.Printf("documents matched: %v\n", result.MatchedCount)
+	l.Printf("documents updated: %v\n", result.ModifiedCount)
+
+	return true
+}
