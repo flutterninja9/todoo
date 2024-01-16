@@ -20,7 +20,7 @@ type UpdateTodoRequest struct {
 
 func (u *UpdateTodoRequest) toEntity(id string) *models.Todo {
 	entity := new(models.Todo)
-	entity.Id, _ = primitive.ObjectIDFromHex(id)
+	entity.ID, _ = primitive.ObjectIDFromHex(id)
 	entity.Status = string(u.Status)
 
 	if u.Title != nil && *u.Title != "" {
@@ -74,7 +74,7 @@ func (l *UpdateTodoHandler) Handle(c *gin.Context) {
 	entity := updateRequest.toEntity(id)
 	updated := entity.UpdateTodo(id, l.db, l.logger)
 
-	if !updated {
+	if updated != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Oops! something went wrong while updating"})
 		return
 	}

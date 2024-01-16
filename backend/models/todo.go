@@ -1,7 +1,12 @@
+// models package contains data models and functions for interacting with the database.
+
 package models
 
 import (
 	"context"
+	"errors"
+	"fmt"
+	"time"
 
 	"github.com/flutterninja9/todoo/backend/config"
 	"github.com/flutterninja9/todoo/backend/constants"
@@ -11,99 +16,109 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+// Todo represents a task in the system.
 type Todo struct {
-	Id        primitive.ObjectID `bson:"_id" json:"id"`
-	UserId    primitive.ObjectID `bson:"user_id" json:"user_id"`
+	ID        primitive.ObjectID `bson:"_id" json:"id"`
+	UserID    primitive.ObjectID `bson:"user_id" json:"user_id"`
 	Status    string             `bson:"status" json:"status"`
 	Title     string             `bson:"title" json:"title"`
 	Content   string             `bson:"content" json:"content"`
-	CreatedAt primitive.DateTime `bson:"created_at" json:"created_at"`
-	UpdatedAt primitive.DateTime `bson:"updated_at" json:"updated_at"`
+	CreatedAt time.Time          `bson:"created_at" json:"created_at"`
+	UpdatedAt time.Time          `bson:"updated_at" json:"updated_at"`
 }
 
+// Save inserts a new Todo into the database.
 func (t *Todo) Save(db *db.Database, l *logrus.Logger, c config.Config) error {
 	l.Info("Trying to save ", t)
 	collection := db.Client.Database(constants.TODOSDB).Collection(constants.TODOSCOLL)
 	_, err := collection.InsertOne(context.TODO(), t)
 	if err != nil {
-		l.Warning("Error while saving todo", err)
-		return err
+		l.WithError(err).Error("Error while saving todo")
+		return fmt.Errorf("error saving todo: %w", err)
 	}
 	l.Info("Todo created")
 	return nil
 }
 
-func GetTodosByUserId(id string, d *db.Database, l *logrus.Logger) ([]Todo, error) {
+// GetTodosByUserID retrieves all Todos associated with a given user ID.
+func GetTodosByUserID(id string, d *db.Database, l *logrus.Logger) ([]Todo, error) {
 	l.Info("Trying to get todos for user ", id)
-	collection := d.Client.Database(constants.TODOSDB).Collection(constants.TODOSCOLL)
-	pUsrId, _ := primitive.ObjectIDFromHex(id)
-	cursor, err := collection.Find(context.TODO(), bson.M{"user_id": pUsrId})
+	pUserID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		l.Fatal("Some error occured while querying for data", err)
-		return nil, err
+		return nil, fmt.Errorf("invalid user ID: %w", err)
 	}
 
-	defer cursor.Close(context.TODO())
-	var result []Todo
-	err = cursor.All(context.TODO(), &result)
+	collection := d.Client.Database(constants.TODOSDB).Collection(constants.TODOSCOLL)
+	cursor, err := collection.Find(context.TODO(), bson.M{"user_id": pUserID})
 	if err != nil {
-		l.Fatal("Some error occured while setting data", err)
-		return nil, err
+		return nil, fmt.Errorf("error querying data: %w", err)
+	}
+	defer cursor.Close(context.TODO())
+
+	var result []Todo
+	if err := cursor.All(context.TODO(), &result); err != nil {
+		return nil, fmt.Errorf("error setting data: %w", err)
 	}
 
 	l.Info("Total records:", len(result))
 	return result, nil
 }
 
+// todoSaveableBson generates the BSON document for updating a Todo.
 func (t *Todo) todoSaveableBson() primitive.D {
-	updates := bson.D{}
-	updates = append(updates, bson.E{Key: "status", Value: string(t.Status)})
+	updates := bson.D{{Key: "status", Value: t.Status}}
+	updates = append(updates, bson.E{Key: "updated_at", Value: time.Now().UTC()})
 
 	if t.Title != "" {
 		updates = append(updates, bson.E{Key: "title", Value: t.Title})
-
 	}
 
 	if t.Content != "" {
 		updates = append(updates, bson.E{Key: "content", Value: t.Content})
-
 	}
 
 	return updates
 }
 
-// returns [true] if update request is successfull
-func (t *Todo) UpdateTodo(i string, d *db.Database, l *logrus.Logger) bool {
+// UpdateTodo updates a Todo in the database.
+func (t *Todo) UpdateTodo(id string, d *db.Database, l *logrus.Logger) error {
 	l.Info("Trying to update todo")
-	primitiveObjId, _ := primitive.ObjectIDFromHex(i)
-	l.Info(primitiveObjId)
-	var filter = bson.D{{Key: "_id", Value: primitiveObjId}}
-	var updates = bson.D{
-		{
-			Key:   "$set",
-			Value: t.todoSaveableBson(),
-		},
+	primitiveObjID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return fmt.Errorf("invalid Todo ID: %w", err)
 	}
 
+	filter := bson.M{"_id": primitiveObjID}
+	updates := bson.D{{Key: "$set", Value: t.todoSaveableBson()}}
+
 	collection := d.Client.Database(constants.TODOSDB).Collection(constants.TODOSCOLL)
-	var result, err = collection.UpdateOne(context.TODO(), filter, updates)
+	result, err := collection.UpdateOne(context.TODO(), filter, updates)
 	if err != nil {
-		l.Fatal("Unable to update todo: ", err.Error())
-		return false
+		return fmt.Errorf("unable to update todo: %w", err)
 	}
 
 	l.Printf("documents matched: %v\n", result.MatchedCount)
 	l.Printf("documents updated: %v\n", result.ModifiedCount)
 
-	return true
+	return nil
 }
 
-func DeleteTodo(id string, db *db.Database, l *logrus.Logger) error {
-	collection := db.Client.Database(constants.TODOSDB).Collection(constants.TODOSCOLL)
-	primitiveTodoId, _ := primitive.ObjectIDFromHex(id)
-	result, err := collection.DeleteOne(context.TODO(), bson.M{"_id": primitiveTodoId})
+// DeleteTodo deletes a Todo from the database.
+func DeleteTodo(id string, d *db.Database, l *logrus.Logger) error {
+	l.Info("Trying to delete todo")
+	primitiveTodoID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		l.Fatal(err.Error())
+		return fmt.Errorf("invalid Todo ID: %w", err)
+	}
+
+	collection := d.Client.Database(constants.TODOSDB).Collection(constants.TODOSCOLL)
+	result, err := collection.DeleteOne(context.TODO(), bson.M{"_id": primitiveTodoID})
+	if err != nil {
+		return fmt.Errorf("error deleting todo: %w", err)
+	}
+
+	if result.DeletedCount == 0 {
+		return errors.New("no todo deleted")
 	}
 
 	l.Info("Deleted ", result.DeletedCount, " todos")

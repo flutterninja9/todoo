@@ -31,7 +31,7 @@ func (l *GetTodosHandler) Handle(c *gin.Context) {
 
 	authInfo := authData.(*middleware.AuthInfo)
 	userId := authInfo.Claims["user_id"].(string)
-	todos, err := models.GetTodosByUserId(userId, l.db, l.logger)
+	todos, err := models.GetTodosByUserID(userId, l.db, l.logger)
 	if err != nil {
 		l.logger.Fatal(err)
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Unable to get todos"})
