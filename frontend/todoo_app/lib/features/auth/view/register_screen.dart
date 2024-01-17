@@ -3,12 +3,13 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:todoo_app/core/async_value/async_value.dart';
 import 'package:todoo_app/core/design_system/app_theme.dart';
-import 'package:todoo_app/features/auth/view/login_screen.dart';
 import 'package:todoo_app/features/auth/view_model/auth_view_model.dart';
+import 'package:todoo_app/features/todo/view/todos_screen.dart';
 
 class RegisterForm extends StatefulWidget {
-  const RegisterForm({Key? key}) : super(key: key);
-  static const route = "/register";
+  const RegisterForm({Key? key, required this.onClickLogin}) : super(key: key);
+
+  final VoidCallback onClickLogin;
 
   @override
   State<RegisterForm> createState() => _RegisterFormState();
@@ -203,6 +204,9 @@ class _RegisterFormState extends State<RegisterForm> {
                             lastName: lastNameController.text,
                             email: emailController.text,
                             password: passwordController.text,
+                            postSuccessCallback: () {
+                              context.go(TodosScreen.route);
+                            },
                           );
                         }
                       },
@@ -215,7 +219,7 @@ class _RegisterFormState extends State<RegisterForm> {
                   }),
                   const SizedBox(height: 24.0),
                   TextButton(
-                    onPressed: () => context.go(LoginForm.route),
+                    onPressed: widget.onClickLogin,
                     style: TextButton.styleFrom(
                         foregroundColor: AppTheme.of(context).textColor),
                     child: const Text('Already have an account? Sign-in'),

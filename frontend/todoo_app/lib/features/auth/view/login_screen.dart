@@ -3,13 +3,12 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:todoo_app/core/async_value/async_value.dart';
 import 'package:todoo_app/core/design_system/app_theme.dart';
-import 'package:todoo_app/features/auth/view/register_screen.dart';
 import 'package:todoo_app/features/auth/view_model/auth_view_model.dart';
+import 'package:todoo_app/features/todo/view/todos_screen.dart';
 
 class LoginForm extends StatefulWidget {
-  const LoginForm({Key? key}) : super(key: key);
-  static const route = "/login";
-
+  const LoginForm({Key? key, required this.onClickRegister}) : super(key: key);
+  final VoidCallback onClickRegister;
   @override
   State<LoginForm> createState() => _LoginFormState();
 }
@@ -124,7 +123,10 @@ class _LoginFormState extends State<LoginForm> {
                   const SizedBox(height: 24.0),
                   Consumer<AuthViewModel>(builder: (context, provider, child) {
                     if (provider.state == ViewState.loading) {
-                      return const Center(child: CircularProgressIndicator());
+                      return Center(
+                          child: CircularProgressIndicator(
+                        color: AppTheme.of(context).orangeColor,
+                      ));
                     }
 
                     return ElevatedButton(
@@ -133,6 +135,9 @@ class _LoginFormState extends State<LoginForm> {
                           provider.loginUser(
                             email: emailController.text,
                             password: passwordController.text,
+                            postSuccessCallback: () {
+                              context.go(TodosScreen.route);
+                            },
                           );
                         }
                       },
@@ -145,7 +150,7 @@ class _LoginFormState extends State<LoginForm> {
                   }),
                   const SizedBox(height: 24.0),
                   TextButton(
-                    onPressed: () => context.go(RegisterForm.route),
+                    onPressed: widget.onClickRegister,
                     style: TextButton.styleFrom(
                         foregroundColor: AppTheme.of(context).textColor),
                     child: const Text('Don\t have an account? Create one now'),

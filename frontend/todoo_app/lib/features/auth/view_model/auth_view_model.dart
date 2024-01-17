@@ -5,8 +5,6 @@ import 'package:todoo_app/features/auth/model/register_request.dart';
 import 'package:todoo_app/features/auth/model/user_model.dart';
 import 'package:todoo_app/features/auth/repository/auth_repository.dart';
 
-enum AuthState { initial, loading, loggedIn, loggedOut, error }
-
 class AuthViewModel with ChangeNotifier, StateMixin {
   final AuthRepository _authRepository;
 
@@ -23,6 +21,7 @@ class AuthViewModel with ChangeNotifier, StateMixin {
     required String lastName,
     required String email,
     required String password,
+    required Function() postSuccessCallback,
   }) async {
     try {
       setLoading();
@@ -36,6 +35,7 @@ class AuthViewModel with ChangeNotifier, StateMixin {
       _user = response;
       _token = response.token;
       setState(ViewState.loaded);
+      postSuccessCallback();
     } catch (e) {
       setError('Registration failed: $e');
     }
@@ -44,6 +44,7 @@ class AuthViewModel with ChangeNotifier, StateMixin {
   Future<void> loginUser({
     required String email,
     required String password,
+    required Function() postSuccessCallback,
   }) async {
     try {
       setLoading();
@@ -54,6 +55,7 @@ class AuthViewModel with ChangeNotifier, StateMixin {
       final response = await _authRepository.login(request);
       _token = response.token;
       setState(ViewState.loaded);
+      postSuccessCallback();
     } catch (e) {
       setError('Login failed: $e');
     }
@@ -63,5 +65,6 @@ class AuthViewModel with ChangeNotifier, StateMixin {
     setIdle();
     _user = null;
     _token = null;
+    notifyListeners();
   }
 }
