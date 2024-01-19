@@ -50,8 +50,8 @@ func (a *AppRouter) Setup() {
 	a.engine.GET("/", a.healthCheck.Handle)
 	a.engine.POST("/login", a.login.Handle)
 	a.engine.POST("/register", a.register.Handle)
-	todos.GET("/", a.getTodos.Handle)
-	todos.POST("/", a.createTodo.Handle)
-	todos.PATCH("/:id", a.updateTodo.Handle)
-	todos.DELETE("/:id", a.deleteTodo.Handle)
+	todos.GET("", a.getTodos.Handle)
+	todos.POST("", a.createTodo.Handle)
+	todos.PATCH(":id", a.updateTodo.Handle)
+	todos.DELETE(":id", a.deleteTodo.Handle)
 }
