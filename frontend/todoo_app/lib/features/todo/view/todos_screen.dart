@@ -4,6 +4,7 @@ import 'package:todoo_app/core/async_value/async_value.dart';
 import 'package:todoo_app/core/design_system/app_theme.dart';
 import 'package:todoo_app/di/di.dart';
 import 'package:todoo_app/features/auth/view_model/auth_view_model.dart';
+import 'package:todoo_app/features/todo/view/widgets/todos_loaded_widget.dart';
 import 'package:todoo_app/features/todo/view_model/todos_view_model.dart';
 
 class TodosScreen extends StatefulWidget {
@@ -44,8 +45,44 @@ class _TodosScreenState extends State<TodosScreen> {
           ),
           actions: [
             IconButton(
-              onPressed: () {
-                context.read<AuthViewModel>().logoutUser();
+              onPressed: () async {
+                await showDialog(
+                    context: context,
+                    builder: (context) {
+                      return AlertDialog(
+                        title: Text(
+                          "You you sure?",
+                          style: Theme.of(context)
+                              .textTheme
+                              .headlineSmall
+                              ?.copyWith(color: AppTheme.of(context).textColor),
+                        ),
+                        backgroundColor: AppTheme.of(context).backgroundColor,
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            child: Text(
+                              "No",
+                              style: TextStyle(
+                                  color: AppTheme.of(context).textColor),
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                              context.read<AuthViewModel>().logoutUser();
+                            },
+                            child: Text(
+                              "Yes",
+                              style: TextStyle(
+                                  color: AppTheme.of(context).textColor),
+                            ),
+                          ),
+                        ],
+                      );
+                    });
               },
               color: AppTheme.of(context).iconColor,
               icon: const Icon(Icons.logout),
@@ -61,30 +98,15 @@ class _TodosScreenState extends State<TodosScreen> {
                 ),
               );
             }
-            if (provider.state == ViewState.empty) {
-              return const Center(
-                child: Text("No todos found!"),
-              );
-            }
-            if (provider.state == ViewState.error) {
-              return Center(
-                child: Text(provider.errorMessage),
-              );
-            }
-            if (provider.state == ViewState.loaded) {
-              return ListView.builder(
-                itemBuilder: (context, index) {
-                  final todo = provider.todos!.todos[index];
 
-                  return ListTile(
-                    title: Text(todo.title),
-                    subtitle: Text(todo.content),
-                  );
-                },
-                itemCount: provider.todos?.count,
-              );
-            }
-            return const SizedBox.shrink();
+            return TodosLoadedWidget(
+              todos: provider.todos,
+              isEmpty: provider.state == ViewState.empty,
+              isError: provider.state == ViewState.error,
+              onCreate: viewModel.addTodo,
+              onDelete: viewModel.deleteTodo,
+              onUpdate: viewModel.updateTodo,
+            );
           },
         ),
       ),

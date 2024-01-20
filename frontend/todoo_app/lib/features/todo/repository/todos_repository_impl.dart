@@ -9,10 +9,21 @@ class TodosRepositoryImpl implements TodosRepository {
 
   @override
   Future<TodoResponse> fetchTodos({String? day}) async {
-    try {
-      return await _todosEndpoint.getAllTodos(day);
-    } catch (e) {
-      throw Exception('Failed to fetch todos: $e');
-    }
+    return _todosEndpoint.getAllTodos(day);
+  }
+
+  @override
+  Future<void> createTodo(Todo todo) {
+    return _todosEndpoint.createTodo(todo);
+  }
+
+  @override
+  Future<void> deleteTodo(String id) {
+    return _todosEndpoint.deleteTodo(id);
+  }
+
+  @override
+  Future<void> updateTodo(Todo todo) {
+    return _todosEndpoint.updateTodo(todo.id!, todo);
   }
 }

@@ -16,6 +16,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final router = AppRouter(sl<AuthViewModel>()).router;
     return ChangeNotifierProvider.value(
       value: sl<AuthViewModel>(),
       child: AppTheme.dark(
@@ -26,7 +27,7 @@ class MyApp extends StatelessWidget {
             colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
             useMaterial3: true,
           ),
-          routerConfig: AppRouter(sl<AuthViewModel>()).router,
+          routerConfig: router,
         ),
       ),
     );

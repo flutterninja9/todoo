@@ -10,4 +10,13 @@ abstract class TodosEndpoint {
 
   @GET('/todos')
   Future<TodoResponse> getAllTodos(@Query("day") String? day);
+
+  @POST('/todos')
+  Future<void> createTodo(@Body() Todo todo);
+
+  @PATCH('/todos/{id}')
+  Future<void> updateTodo(@Path() String id, @Body() Todo todo);
+
+  @DELETE('/todos/{id}')
+  Future<void> deleteTodo(@Path() String id);
 }

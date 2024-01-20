@@ -1,3 +1,5 @@
+// ignore_for_file: non_constant_identifier_names
+
 import 'package:json_annotation/json_annotation.dart';
 
 part 'todo_model.g.dart';
@@ -14,25 +16,25 @@ enum TodoStatus {
 @JsonSerializable()
 class Todo {
   @JsonKey(name: 'id')
-  String ID;
+  String? id;
 
   @JsonKey(name: 'user_id')
-  String userID;
+  String? userID;
 
-  String status;
+  String? status;
 
-  String title;
+  String? title;
 
-  String content;
+  String? content;
 
   @JsonKey(name: 'created_at')
-  DateTime createdAt;
+  DateTime? createdAt;
 
   @JsonKey(name: 'updated_at')
-  DateTime updatedAt;
+  DateTime? updatedAt;
 
   Todo({
-    required this.ID,
+    required this.id,
     required this.userID,
     required this.status,
     required this.title,
@@ -40,6 +42,8 @@ class Todo {
     required this.createdAt,
     required this.updatedAt,
   });
+
+  bool get completed => status == "completed";
 
   factory Todo.fromJson(Map<String, dynamic> json) => _$TodoFromJson(json);
 
@@ -51,6 +55,8 @@ class TodoResponse {
   @JsonKey(name: "data")
   final List<Todo> todos;
   final int count;
+
+  int get completed => todos.where((element) => element.completed).length;
 
   const TodoResponse({required this.todos, required this.count});
 

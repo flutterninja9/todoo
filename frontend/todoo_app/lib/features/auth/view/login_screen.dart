@@ -21,8 +21,8 @@ class _LoginFormState extends State<LoginForm> {
   @override
   void initState() {
     super.initState();
-    emailController = TextEditingController();
-    passwordController = TextEditingController();
+    emailController = TextEditingController(text: "test@gmail.com");
+    passwordController = TextEditingController(text: "test123");
   }
 
   @override
@@ -58,6 +58,7 @@ class _LoginFormState extends State<LoginForm> {
                 children: <Widget>[
                   TextFormField(
                     controller: emailController,
+                    cursorColor: AppTheme.of(context).orangeColor,
                     style: TextStyle(color: AppTheme.of(context).textColor),
                     decoration: InputDecoration(
                       labelText: 'Email',
@@ -92,6 +93,7 @@ class _LoginFormState extends State<LoginForm> {
                   TextFormField(
                     controller: passwordController,
                     style: TextStyle(color: AppTheme.of(context).textColor),
+                    cursorColor: AppTheme.of(context).orangeColor,
                     obscureText: true,
                     decoration: InputDecoration(
                       labelText: 'Password',

@@ -66,6 +66,7 @@ class _RegisterFormState extends State<RegisterForm> {
                 children: <Widget>[
                   TextFormField(
                     controller: firstNameController,
+                    cursorColor: AppTheme.of(context).orangeColor,
                     style: TextStyle(color: AppTheme.of(context).textColor),
                     decoration: InputDecoration(
                       labelText: 'First Name',
@@ -97,6 +98,7 @@ class _RegisterFormState extends State<RegisterForm> {
                   const SizedBox(height: 16.0),
                   TextFormField(
                     controller: lastNameController,
+                    cursorColor: AppTheme.of(context).orangeColor,
                     style: TextStyle(color: AppTheme.of(context).textColor),
                     decoration: InputDecoration(
                       labelText: 'Last Name',
@@ -129,6 +131,7 @@ class _RegisterFormState extends State<RegisterForm> {
                   TextFormField(
                     controller: emailController,
                     style: TextStyle(color: AppTheme.of(context).textColor),
+                    cursorColor: AppTheme.of(context).orangeColor,
                     decoration: InputDecoration(
                       labelText: 'Email',
                       labelStyle:
@@ -161,6 +164,7 @@ class _RegisterFormState extends State<RegisterForm> {
                   const SizedBox(height: 16.0),
                   TextFormField(
                     controller: passwordController,
+                    cursorColor: AppTheme.of(context).orangeColor,
                     style: TextStyle(color: AppTheme.of(context).textColor),
                     obscureText: true,
                     decoration: InputDecoration(
