@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:todoo_app/core/async_value/async_value.dart';
+import 'package:todoo_app/core/extensions/datetime_X.dart';
 import 'package:todoo_app/features/todo/model/todo_model.dart';
 import 'package:todoo_app/features/todo/repository/todos_repository.dart';
 
@@ -11,13 +12,14 @@ class TodoViewModel with ChangeNotifier, StateMixin {
   final TodosRepository _todoRepository;
   TodoResponse? _todos;
   TodoResponse? get todos => _todos;
-  String? currentFilter;
+  DateTime currentFilter = DateTime.now();
 
-  Future<void> fetchTodos({String? day}) async {
+  Future<void> fetchTodos({required DateTime day}) async {
     try {
-      setLoading();
       currentFilter = day;
-      final todos = await _todoRepository.fetchTodos(day: currentFilter);
+      setLoading();
+      final todos = await _todoRepository.fetchTodos(
+          day: currentFilter.toFormattedString());
       _todos = todos;
       if (todos.count == 0) {
         setEmpty();

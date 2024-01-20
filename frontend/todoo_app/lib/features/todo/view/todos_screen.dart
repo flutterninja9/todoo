@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:todoo_app/core/async_value/async_value.dart';
 import 'package:todoo_app/core/design_system/app_theme.dart';
+import 'package:todoo_app/core/extensions/datetime_X.dart';
 import 'package:todoo_app/di/di.dart';
 import 'package:todoo_app/features/auth/view_model/auth_view_model.dart';
 import 'package:todoo_app/features/todo/view/widgets/todos_loaded_widget.dart';
@@ -10,6 +11,7 @@ import 'package:todoo_app/features/todo/view_model/todos_view_model.dart';
 class TodosScreen extends StatefulWidget {
   const TodosScreen({super.key});
   static const route = "/todos";
+
   @override
   State<TodosScreen> createState() => _TodosScreenState();
 }
@@ -21,7 +23,7 @@ class _TodosScreenState extends State<TodosScreen> {
   void initState() {
     super.initState();
     viewModel = sl<TodoViewModel>();
-    viewModel.fetchTodos();
+    viewModel.fetchTodos(day: DateTime.now());
   }
 
   @override
@@ -32,16 +34,41 @@ class _TodosScreenState extends State<TodosScreen> {
         backgroundColor: AppTheme.of(context).backgroundColor,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
-          leading: Icon(
-            Icons.note,
-            color: AppTheme.of(context).iconColor,
-          ),
-          title: Text(
-            "TODOO",
-            style: Theme.of(context)
-                .textTheme
-                .headlineMedium
-                ?.copyWith(color: AppTheme.of(context).textColor),
+          title: Consumer<TodoViewModel>(
+            builder: (context, provider, child) {
+              return Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  IconButton(
+                    onPressed: () {
+                      viewModel.fetchTodos(
+                        day: viewModel.currentFilter
+                            .subtract(const Duration(days: 1)),
+                      );
+                    },
+                    icon: const Icon(Icons.navigate_before_outlined),
+                    color: AppTheme.of(context).iconColor,
+                  ),
+                  Text(
+                    provider.currentFilter.toFormattedString(),
+                    style: TextStyle(color: AppTheme.of(context).textColor),
+                  ),
+                  IconButton(
+                    onPressed: viewModel.currentFilter.toFormattedString() ==
+                            DateTime.now().toFormattedString()
+                        ? null
+                        : () {
+                            viewModel.fetchTodos(
+                              day: viewModel.currentFilter
+                                  .add(const Duration(days: 1)),
+                            );
+                          },
+                    icon: const Icon(Icons.navigate_next_outlined),
+                    color: AppTheme.of(context).iconColor,
+                  ),
+                ],
+              );
+            },
           ),
           actions: [
             IconButton(
